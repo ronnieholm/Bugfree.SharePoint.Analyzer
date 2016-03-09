@@ -138,7 +138,7 @@ If the SharePoint 2007 farm would provide an empty database with
 write access, we wouldn't need separate exporting and
 importing. But creating an extra database in a legacy environment
 isn't always straightforward. Unfortunately LocalDB isn't
-supported with .NET 3.5. Hence the introduction of an
+supported with .NET 3.5. Hence the introduction of the
 intermediate XML model.
 
 The libs folder enables compiling the solution on a machine
