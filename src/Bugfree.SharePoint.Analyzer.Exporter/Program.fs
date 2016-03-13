@@ -10,9 +10,9 @@ let content = SPWebService.ContentService
 
 let visitListItems (list: SPList) level (listItemsElement: E) =
     // itering items sometimes cases exceptions of the form "Feature '<guid>' 
-    // for list template '<id>' is not installed in this farm". Likely
-    // caused by a custom feature once installed in farm and used to created
-    // a list, but which has been uninstalled.
+    // for list template '<id>' is not installed in this farm". This is likely
+    // caused by a custom feature which was once installed in farm and used to 
+    // created the list, but which has since been deactivated and removed.
     try
         for item in list.Items |> Seq.cast<SPListItem> do
             let title = 
@@ -48,10 +48,9 @@ let visitLists (web: SPWeb) level (listsElement: E) =
 
 let rec visitWebRecursively (web: SPWeb) level (websElement: E) =
     // accessing the Name property of a web sometimes causes a
-    // System.IO.DirectoryNotFoundException to be thrown. Attempting to
-    // access the web through the browser, the web doesn't appear to exist.
-    // Exception is likely due to a data inconsistency in the content 
-    // database. 
+    // System.IO.DirectoryNotFoundException to be thrown. Attempting to access
+    // the web through the browser, the web appears to not exist. Exception is
+    // likely caused by a data inconsistency in the content database.
     try
         printfn "%s%s (web)" (new string(' ', level)) (if web.Name = "" then "No title" else web.Name)
         let webElement =
