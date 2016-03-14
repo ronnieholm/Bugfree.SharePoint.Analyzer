@@ -146,6 +146,12 @@ from the server isn't always straightforward. Unfortunately
 LocalDB isn't supported with the .NET 3.5 framework. Hence the
 introduction of the intermediate XML model.
 
+In place of XML, SQL insert statements could've been emitted to a
+file. The file would then be moved to another machine and the SQL
+replayed against a database. On the downside, this would tie both the
+exporter and importer to SQL. In principle, we may wish to query the
+intermediate XML directly and forgo the relational database.
+
 The libs folder enables compiling the solution on a machine
 without SharePoint 2007 installed. Running the exporter on a
 SharePoint server, .NET will load SharePoint server assembly from
