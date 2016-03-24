@@ -1,16 +1,16 @@
 $sqlcmd = "C:\Program Files\Microsoft SQL Server\110\Tools\Binn\sqlcmd.exe"
 $base_path = Split-Path -Path $PSCommandPath -Parent
 $import_base_path = "$($base_path)\src\Bugfree.SharePoint.Analyzer.Importer"
-$new_db_name = "WebApplications"
-$mdf_file_path = "$($import_base_path)\$($new_db_name).mdf"
-$log_file_path = "$($import_base_path)\$($new_db_name).ldf"
+$db_name = "WebApplications"
+$mdf_file_path = "$($import_base_path)\$($db_name).mdf"
+$log_file_path = "$($import_base_path)\$($db_name).ldf"
 $detachdb_path = "$($import_base_path)\detachdb.sql"
 $createdb_path = "$($import_base_path)\createdb.sql"
 
 $detach_db_sql = @"
     USE master;
     GO
-    EXEC sp_detach_db @dbname = '$new_db_name';
+    EXEC sp_detach_db @dbname = '$db_name';
     GO
 "@
 
@@ -27,22 +27,22 @@ if (Test-Path $log_file_path) {
 $create_db_sql = @"
     USE master;
     GO
-    CREATE DATABASE $new_db_name
+    CREATE DATABASE $db_name
     ON
-    (NAME = '$($new_db_name)_dat',
+    (NAME = '$($db_name)_dat',
          FILENAME = '$mdf_file_path',
          SIZE = 10MB,
          MAXSIZE = 50MB,
          FILEGROWTH = 5MB)
     LOG ON
-    (NAME = '$($new_db_name)_log',
+    (NAME = '$($db_name)_log',
          FILENAME = '$log_file_path',
          SIZE = 5MB,
          MAXSIZE = 25MB,
          FILEGROWTH = 5MB)
     GO
 
-    USE WebApplications;
+    USE $db_name;
 "@
 
 $schema = Get-Content "$($import_base_path)\schema.sql"
