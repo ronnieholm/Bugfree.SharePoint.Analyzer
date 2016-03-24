@@ -1,5 +1,5 @@
 $sqlcmd = "C:\Program Files\Microsoft SQL Server\110\Tools\Binn\sqlcmd.exe"
-$base_path = Split-Path -Path $PSCommandPath -Parent
+$base_path = Split-Path $PSCommandPath
 $import_base_path = "$($base_path)\src\Bugfree.SharePoint.Analyzer.Importer"
 $db_name = "WebApplications"
 $mdf_file_path = "$($import_base_path)\$($db_name).mdf"
