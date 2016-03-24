@@ -9,8 +9,8 @@ let xn s = XName.Get s
 let content = SPWebService.ContentService
 
 let visitListItems (list: SPList) level (listItemsElement: E) =
-    // itering items sometimes cases exceptions of the form "Feature '<guid>' 
-    // for list template '<id>' is not installed in this farm". This is likely
+    // iterating items sometimes cases exceptions of the form "Feature '<guid>' 
+    // for list template '<id>' is not installed in this farm". Error is likely
     // caused by a custom feature which was once installed in farm and used to 
     // created the list, but which has since been deactivated and removed.
     try
@@ -26,6 +26,8 @@ let visitListItems (list: SPList) level (listItemsElement: E) =
                 E(xn "ListItem",
                     E(xn "Id", item.UniqueId),
                     E(xn "ItemId", item.ID),
+                    // titles have been observered to sometimes contain special characters.
+                    // It's unclear how these characters got introduced in the first place.
                     E(xn "Title", title.Replace(Convert.ToChar((byte)0x1F), ' ').Replace(Convert.ToChar((byte)0x0B), ' ')),
                     E(xn "Url", item.Url),
                     E(xn "CreatedAt", item.["Created"] :?> DateTime),
