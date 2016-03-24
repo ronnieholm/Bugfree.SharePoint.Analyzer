@@ -11,7 +11,6 @@ which may help answer questions like the following:
   - When was an item in a list last modified?
   - Which security groups are in effect where?
   - Which pages host which web parts?
-  - ...
 
 While each answer provides valuable insight into how SharePoint
 is actually used -- particularly useful in migration scenarios or
