@@ -2,7 +2,6 @@
 open System.Data.SqlClient
 open FSharp.Data
 open System.Xml.Linq
-open System.Data.SqlClient
 
 type E = XElement
 
