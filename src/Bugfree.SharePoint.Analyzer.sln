@@ -7,6 +7,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bugfree.SharePoint.Analyzer
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bugfree.SharePoint.Analyzer.Importer", "Bugfree.SharePoint.Analyzer.Importer\Bugfree.SharePoint.Analyzer.Importer.fsproj", "{F88E2F70-6023-44CF-9BD5-78321D07459F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{2C146E2C-B4E8-4FF3-8883-EDD25BF560A8}"
+	ProjectSection(SolutionItems) = preProject
+		..\build.ps1 = ..\build.ps1
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

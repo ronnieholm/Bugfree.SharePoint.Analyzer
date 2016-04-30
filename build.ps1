@@ -27,7 +27,7 @@ if (Test-Path $log_file) {
 $create_db_sql = @"
     USE master;
     GO
-    CREATE DATABASE $db_name
+    CREATE DATABASE [$db_name]
     ON
     (NAME = '$($db_name)_dat',
          FILENAME = '$mdf_file',
@@ -42,7 +42,7 @@ $create_db_sql = @"
          FILEGROWTH = 5MB)
     GO
 
-    USE $db_name;
+    USE [$db_name];
 "@
 
 $schema = Get-Content "$($importer_base)\schema.sql"
