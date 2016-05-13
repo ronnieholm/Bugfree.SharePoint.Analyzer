@@ -20,24 +20,24 @@ of query runtime in a large farm.
 Instead of running multiple queries against the SharePoint API
 directly, this project contains a skeleton exporter/importer to
 project SharePoint's hierarchical metadata model onto a
-relational read model stored in SQL database (via an intermediate
+relational read model stored in a SQL database (via an intermediate
 XML read model). Using standard database tools and techniques,
-most queries can be answered in a matter of seconds.
+most queries can then be answered in a matter of seconds.
 
 Writing the export/import logic ourselves has the added benefit
 of providing feedback on the source platform and help better
 understand why the results come out the way they do.
 
-In communicating answers to questions, tabular results may
-suffice. Alternatively, PowerBI visualization on the basis of
-parameterized SQL queries may come in handy.
+In communicating answers to questions like the ones above, tabular 
+output may suffice. Alternatively, PowerBI visualization on the 
+basis of parameterized SQL queries may come in handy.
 
 ## How to compile
 
 In order to compile the exporter, first grab a copy of
 Microsoft.SharePoint.dll from a SharePoint 2007 server and place
-it in the libs folder. License restrictions preclude the
-redistribution of the server-side library.
+it in the lib folder. License restrictions preclude the
+redistribution of this Microsoft server-side library.
 
 Because of the importer's use of the
 [FSharp.Data.SqlClient](http://fsprojects.github.io/FSharp.Data.SqlClient)
@@ -55,20 +55,19 @@ adjust the script's values accordingly.
 
 Limited by the web services of SharePoint 2007, the exporter
 connects to SharePoint through the server-side API. This implies
-that the exporter be run on one of the farm's SharePoint
-servers. A server likely not equipped with the latest in
-operating systems and .NET frameworks. The server may not even
-have Internet access.
+the exporter be run on one of the farm's SharePoint servers. A 
+server likely not equipped with the latest in operating systems 
+and .NET frameworks. The server may not even have Internet access.
 
 Thus, the exporter is compiled against .NET Framework 3.5 and
 runs on .NET runtime 2.0, which is what SharePoint itself
-requires. To invoke it, provide the web application name as show
-below. Remember to surround the argument with quotes if it
-contains spaces:
+runs on. To invoke the exporter, provide the web application 
+name as shown below. Remember to surround the argument with
+quotes if it contains spaces:
 
     % .\Bugfree.SharePoint.Analyzer.Exporter.exe <web-app-name>
  
-The exporter outputs an XML read model in
+The exporter outputs an XML read model to
 &lt;web-app-name&gt;.xml. This file must be transferred to
 another computer running more up-to-date software for import into
 the SQL database. Multiple XML files may be imported into the
@@ -88,7 +87,7 @@ LocalDB, the connection string follows this pattern:
 
 To order the list of site collections within a web application by
 last list item modification date descending, the following query
-is required. It provides a skeleton query for how to traverse the
+is needed. It provides a skeleton query for how to traverse the
 hierarchical structure of SharePoint when represented
 relationally:
 
@@ -131,30 +130,30 @@ the XML model, emitting SQL statements as it progresses.
 The exporter and importer started out with a type-based domain
 model of WebApplication, SiteCollection, Web, List, and
 ListItem. Those types were then annotated with DataMember and
-DataContract attributes to aid the DataContractSerializer with
+DataContract attributes to aid the DataContractSerializer in
 XML serialization and deserialization. For some reason, .NET
 wasn't able to correctly serialize and deserialize the XML back
 into objects across .NET versions. Instead, serialization and
 deserialization is now handcrafted.
 
-If the SharePoint 2007 farm would provide an empty database with
+If the SharePoint 2007 farm would guarantee an empty database with
 write access or an Internet connection to SQL Azure, we wouldn't
 need separate exporting and importing tools. But creating an
 extra database in a legacy environment or enable Internet access
-from the server isn't always straightforward. Unfortunately
+from a server isn't always straightforward. Unfortunately
 LocalDB isn't supported with the .NET 3.5 framework. Hence the
 introduction of the intermediate XML model.
 
 In place of XML, SQL insert statements could've been emitted to a
-file. The file would then be moved to another machine and the SQL
+file. The file could then be moved to another machine and the SQL
 replayed against a database. On the downside, this would tie both the
 exporter and importer to SQL. In principle, we may wish to query the
 intermediate XML directly and forgo the relational database.
 
-The libs folder enables compiling the solution on a machine
-without SharePoint 2007 installed. Running the exporter on a
-SharePoint server, .NET will load SharePoint server assembly from
-the Global Assembly Cache.
+Placing Microsoft.SharePoint.dll inside the lib folder enables compiling 
+the solution on a machine without SharePoint 2007 installed. Running 
+the exporter on a SharePoint server, the .NET runtime will load 
+SharePoint server assembly from the Global Assembly Cache.
 
 ## Supported platforms
 
