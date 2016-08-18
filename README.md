@@ -21,7 +21,7 @@ Instead of running multiple queries against the SharePoint API
 directly, this project contains a skeleton exporter/importer to
 project SharePoint's hierarchical metadata model onto a
 relational read model stored in a SQL database (via an intermediate
-XML read model -- effectively an Extract, Transform, Load ([https://en.wikipedia.org/wiki/Extract,_transform,_load](ETL))
+XML read model -- effectively an Extract, Transform, Load ([ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load))
 process). Using standard database tools and techniques, most queries 
 can then be answered in a matter of seconds.
 
