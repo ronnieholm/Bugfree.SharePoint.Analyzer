@@ -37,15 +37,15 @@ $create_db_sql = @"
     LOG ON
     (NAME = '$($db_name)_log',
          FILENAME = '$log_file',
-         SIZE = 5MB,
-         MAXSIZE = 25MB,
+         SIZE = 10MB,
+         MAXSIZE = 50MB,
          FILEGROWTH = 5MB)
     GO
 
     USE [$db_name];
 "@
 
-$schema = Get-Content "$($importer_base)\schema.sql"
+$schema = [system.io.file]::ReadAllText("$($importer_base)\schema.sql") 
 $create_db_sql = $create_db_sql + $schema
 $create_db_sql | Out-File $createdb
 &$sqlcmd -S "(localdb)\v11.0" -i $createdb

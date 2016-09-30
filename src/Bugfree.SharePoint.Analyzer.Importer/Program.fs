@@ -14,33 +14,80 @@ module Db =
     type InsertWeb = SqlCommandProvider<"insert into [Webs] (Id, Title, Url, ParentWebId, SiteCollectionId) values (@id, @title, @url, @parentWebId, @siteCollectionId)", compileTimeConnectionString, AllParametersOptional = true>
     type InsertListItem = SqlCommandProvider<"insert into [ListItems] (Id, ItemId, Title, Url, CreatedAt, ModifiedAt, ContentTypeId, ListId) values (@id, @itemId, @title, @Url, @createdAt, @modifiedAt, @contentTypeId, @listId)", compileTimeConnectionString>
     type InsertList = SqlCommandProvider<"insert into [Lists] (Id, Title, WebId) values (@id, @title, @webId)", compileTimeConnectionString>
+    type InsertDocumentLibrary = SqlCommandProvider<"insert into [DocumentLibraries] (Id, Title, WebId) values (@id, @title, @webId)", compileTimeConnectionString>
+    type InsertDocumentLibraryItem = SqlCommandProvider<"insert into [DocumentLibraryItems] (Id, ItemId, Title, Url, CreatedAt, ModifiedAt, ContentTypeId, DocumentLibraryId, Name, Length, CheckOutStatus, CheckedOutBy, CheckedOutDate, MajorVersion, MinorVersion) values (@id, @itemId, @title, @Url, @createdAt, @modifiedAt, @contentTypeId, @documentLibraryId, @name, @length, @checkOutStatus, @checkedOutBy, @checkedOutDate, @majorVersion, @minorVersion)", compileTimeConnectionString>
 
     type ClearAll = 
         SqlCommandProvider<
-            "delete from [WebApplications]; delete from [SiteCollections]; delete from [Webs]; delete from [Lists]; delete from [ListItems]", compileTimeConnectionString>
+            "delete from [WebApplications]; 
+             delete from [SiteCollections]; 
+             delete from [Webs]; 
+             delete from [Lists]; 
+             delete from [ListItems];
+             delete from [DocumentLibraries];
+             delete from [DocumentLibraryItems]", compileTimeConnectionString>
 
 let xn s = XName.Get s
 
 let parseListItems (items: E) (c: SqlConnection) (t: SqlTransaction) =
-    for item in items.Elements(xn "ListItem") do
-        let id = Guid(item.Element(xn "Id").Value)
-        let itemId = item.Element(xn "ItemId").Value |> int
-        let title = (item.Element(xn "Title").Value)
-        let url = (item.Element(xn "Url").Value)
-        let createdAt = DateTime.Parse(item.Element(xn "CreatedAt").Value)
-        let modifiedAt = DateTime.Parse(item.Element(xn "ModifiedAt").Value)
-        let contentTypeId = (item.Element(xn "ContentTypeId").Value)
-        let listId = Guid(item.Parent.Parent.Element(xn "Id").Value)
+    for i in items.Elements(xn "ListItem") do
+        let id = Guid(i.Element(xn "Id").Value)
+        let itemId = i.Element(xn "ItemId").Value |> int
+        let title = (i.Element(xn "Title").Value)
+        let url = (i.Element(xn "Url").Value)
+        let createdAt = DateTime.Parse(i.Element(xn "CreatedAt").Value)
+        let modifiedAt = DateTime.Parse(i.Element(xn "ModifiedAt").Value)
+        let contentTypeId = (i.Element(xn "ContentTypeId").Value)
+        let listId = Guid(i.Parent.Parent.Element(xn "Id").Value)
         (new Db.InsertListItem(c, t)).Execute(id, itemId, title, url, createdAt, modifiedAt, contentTypeId, listId) |> ignore
 
-let parseLists (lists: E) (c: SqlConnection) (t: SqlTransaction) =
-    for list in lists.Elements(xn "List") do
-        let id = Guid(list.Element(xn "Id").Value)
-        let title = list.Element(xn "Title").Value
-        let webId = Guid(lists.Parent.Element(xn "Id").Value)
-        (new Db.InsertList(c, t)).Execute(id, title, webId) |> ignore
-        parseListItems (list.Element(xn "ListItems")) c t
+let parseDocumentLibraryItems (items: E) (c: SqlConnection) (t: SqlTransaction) =
+    for d in items.Elements(xn "DocumentLibraryItem") do
+        let id = Guid(d.Element(xn "Id").Value)
+        let itemId = d.Element(xn "ItemId").Value |> int
+        let title = (d.Element(xn "Title").Value)
+        let url = (d.Element(xn "Url").Value)
+        let createdAt = DateTime.Parse(d.Element(xn "CreatedAt").Value)
+        let modifiedAt = DateTime.Parse(d.Element(xn "ModifiedAt").Value)
+        let contentTypeId = (d.Element(xn "ContentTypeId").Value)
+        let listId = Guid(d.Parent.Parent.Element(xn "Id").Value)
 
+        // file subtree
+        let f = d.Element(xn "File")
+        let name = f.Element(xn "Name").Value
+        let length = Int32.Parse(f.Element(xn "Length").Value)
+        let checkOutStatus = f.Element(xn "CheckOutStatus").Value
+        let checkedOutBy = f.Element(xn "CheckedOutBy").Value
+        let checkedOutDate = f.Element(xn "CheckedOutDate").Value
+        let majorVersion = Int32.Parse(f.Element(xn "MajorVersion").Value)
+        let minorVersion = Int32.Parse(f.Element(xn "MinorVersion").Value)        
+
+        // input date invalid when convertering to DateTime. Thus, we change
+        // it some a valid default date
+        // TODO: Change exporter instead
+        let checkedOutDate' =
+            if checkedOutDate = "0001-01-01T00:00:00"
+            then DateTime(1900, 1, 1)
+            else DateTime.Parse(checkedOutDate)
+
+        (new Db.InsertDocumentLibraryItem(c, t)).Execute(id, itemId, title, url, createdAt, modifiedAt, contentTypeId, listId, name, length, checkOutStatus, checkedOutBy, checkedOutDate', majorVersion, minorVersion) |> ignore
+
+let parseLists (lists: seq<E>) (c: SqlConnection) (t: SqlTransaction) =
+    for l in lists do
+        let id = Guid(l.Element(xn "Id").Value)
+        let title = l.Element(xn "Title").Value
+        let webId = Guid(l.Parent.Parent.Element(xn "Id").Value)
+        (new Db.InsertList(c, t)).Execute(id, title, webId) |> ignore
+        parseListItems (l.Element(xn "ListItems")) c t
+
+let parseDocumentLibraries (documentLibraries: seq<E>) (c: SqlConnection) (t: SqlTransaction) =
+    for d in documentLibraries do
+        let id = Guid(d.Element(xn "Id").Value)
+        let title = d.Element(xn "Title").Value
+        let webId = Guid(d.Parent.Parent.Element(xn "Id").Value)
+        (new Db.InsertDocumentLibrary(c, t)).Execute(id, title, webId) |> ignore
+        parseDocumentLibraryItems (d.Element(xn "DocumentLibraryItems")) c t        
+      
 let rec parseWebs (webs: E) (c: SqlConnection) (t: SqlTransaction) =
     let getParentWebId (web: E) =        
         let p = web.Parent
@@ -60,9 +107,12 @@ let rec parseWebs (webs: E) (c: SqlConnection) (t: SqlTransaction) =
         let id = Guid(web.Element(xn "Id").Value)
         let title = web.Element(xn "Title").Value
         let url = web.Element(xn "Url").Value
-        (new Db.InsertWeb(c, t)).Execute(Some(id), Some(title), Some(url), getParentWebId(web), Some(siteCollectionId)) |> ignore                
-         
-        parseLists (web.Element(xn "Lists")) c t
+        (new Db.InsertWeb(c, t)).Execute(Some(id), Some(title), Some(url), getParentWebId(web), Some(siteCollectionId)) |> ignore
+
+        let lists = web.Element(xn "Lists").Descendants(xn "List") |> Seq.toList
+        let documentLibraries = web.Element(xn "Lists").Descendants(xn "DocumentLibrary") |> Seq.toList
+        parseLists lists c t
+        parseDocumentLibraries documentLibraries c t
         parseWebs (web.Element(xn "Webs")) c t
 
 let parseSiteCollections (scs: E) (c: SqlConnection) (t: SqlTransaction) =
@@ -85,21 +135,25 @@ let parseWebApplications (webApplications: E) (c: SqlConnection) (t: SqlTransact
 
 [<EntryPoint>]
 let main argv = 
-    let importFilePath = argv.[0]
-    let runtimeConnectionString = argv.[1]
-    use connection = new SqlConnection(runtimeConnectionString)
+    match argv |> Array.toList with
+    | ["--importFilePath"; importFilePath; "--connection-string"; runtimeConnectionString] ->
+        use connection = new SqlConnection(runtimeConnectionString)
 
-    connection.Open()
-    use transaction = connection.BeginTransaction()
-    let document = XDocument.Load(importFilePath)
-    let webApplications = document.Root    
+        connection.Open()
+        use transaction = connection.BeginTransaction()
+        let document = XDocument.Load(importFilePath)
+        let webApplications = document.Root    
 
-    try
-        (new Db.ClearAll(connection, transaction)).Execute() |> ignore
-        parseWebApplications webApplications connection transaction
-        transaction.Commit()
-    with
-    | _ -> 
-        transaction.Rollback()
-        reraise()
+        try
+            //(new Db.ClearAll(connection, transaction)).Execute() |> ignore
+            parseWebApplications webApplications connection transaction
+            transaction.Commit()
+        with
+        | _ -> 
+            transaction.Rollback()
+            reraise()
+    | ["--help"]
+    | _ ->
+        printfn "Bugfree.SharePoint.Analyzer.Importer.exe --importFilePath <file-path> --connection-string <connection-string>"
+
     0

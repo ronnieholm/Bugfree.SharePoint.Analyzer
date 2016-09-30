@@ -6,9 +6,10 @@ and webs. In this context, structural metadata refers to any
 piece of information accessible through the SharePoint API and
 which may help answer questions like the following:
 
+  - Which items are checked out and by whom?
+  - When was an item in a list last modified?
   - Which content types are associated with which document libraries?
   - Which features are enabled where?
-  - When was an item in a list last modified?
   - Which security groups are in effect where?
   - Which pages host which web parts?
 
