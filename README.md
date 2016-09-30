@@ -110,7 +110,18 @@ select sc.Url, max(LastModifiedAt) LastModifiedAt from
     inner join SiteCollections sc on sc.Id = LatestWebs.SiteCollectionId
     group by sc.Url
     order by LastModifiedAt desc
+```
 
+To list documents checked out by users across all imported web applications:
+
+```sql
+select wa.Title, w.Url, dli.Url, dli.CheckedOutDate, dli.CheckedOutBy, dli.MajorVersion, dli.MinorVersion
+from DocumentLibraryItems dli
+inner join DocumentLibraries dl on dl.Id = dli.DocumentLibraryId
+inner join Webs w on w.Id = dl.WebId
+inner join SiteCollections sc on sc.Id = w.SiteCollectionId
+inner join WebApplications wa on wa.Id = sc.WebApplicationId
+where CheckedOutDate <> '1900-01-01 00:00:00.000'
 ```
 
 ## How it works
